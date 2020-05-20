@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from inspect import getfullargspec
 import nengo
 from nengo.builder import Builder
 from nengo.builder.operator import Reset, Copy
@@ -710,10 +711,26 @@ def test_null_error(Simulator):
 
 def test_argreprs():
     """Test repr() for each learning rule type."""
+
+    def check_init_args(cls, args):
+        assert getfullargspec(cls.__init__).args[1:] == args
+
+    def check_repr(obj):
+        assert eval(repr(obj)) == obj
+
+    check_init_args(PES, ["learning_rate", "pre_synapse"])
+    check_repr(PES(learning_rate=0.1, pre_synapse=Lowpass(tau=0.2)))
     assert repr(PES()) == "PES()"
     assert (
         repr(PES(learning_rate=0.1, pre_synapse=0.2))
         == "PES(learning_rate=0.1, pre_synapse=Lowpass(tau=0.2))"
+    )
+    check_init_args(
+        BCM, ["learning_rate", "pre_synapse", "post_synapse", "theta_synapse"]
+    )
+    check_repr(
+        "BCM(learning_rate=0.1, pre_synapse=0.2,"
+        " post_synapse=0.3, theta_synapse=0.4)"
     )
     assert repr(BCM()) == "BCM()"
     assert (
@@ -723,12 +740,19 @@ def test_argreprs():
         == "BCM(learning_rate=0.1, pre_synapse=Lowpass(tau=0.2), "
         "post_synapse=Lowpass(tau=0.3), theta_synapse=Lowpass(tau=0.4))"
     )
+    check_init_args(Oja, ["learning_rate", "pre_synapse", "post_synapse", "beta"])
+    check_repr(
+        "Oja(learning_rate=0.1, pre_synapse=Lowpass(tau=0.2),"
+        "post_synapse=Lowpass(tau=0.3), beta=0.4)"
+    )
     assert repr(Oja()) == "Oja()"
     assert (
         repr(Oja(learning_rate=0.1, pre_synapse=0.2, post_synapse=0.3, beta=0.4))
         == "Oja(learning_rate=0.1, pre_synapse=Lowpass(tau=0.2), "
         "post_synapse=Lowpass(tau=0.3), beta=0.4)"
     )
+    check_init_args(Voja, ["learning_rate", "post_synapse"])
+    check_repr(Voja(learning_rate=0.1, post_synapse=Lowpass(tau=0.2)))
     assert repr(Voja()) == "Voja()"
     assert (
         repr(Voja(learning_rate=0.1, post_synapse=0.2))

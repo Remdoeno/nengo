@@ -1,7 +1,10 @@
 import numpy as np
+from numpy import array
 import pytest
+from inspect import getfullargspec
 
 import nengo
+from nengo import Dense, Sparse, Convolution
 from nengo.exceptions import BuildError, ValidationError
 from nengo.transforms import ChannelShape, NoTransform, SparseMatrix
 from nengo._vendor.npconv2d import conv2d
@@ -202,25 +205,63 @@ def test_sparse_nef(encoders, decoders, Simulator):
 
 def test_argreprs():
     """Test repr() for each transform type."""
-    assert repr(nengo.Dense((1, 2), init=[[1, 1]])) == "Dense(shape=(1, 2))"
+
+    def check_init_args(cls, args):
+        assert getfullargspec(cls.__init__).args[1:] == args
+
+    def check_repr(obj):
+        assert eval(repr(obj)) == obj
+
+    check_init_args(Dense, ["shape", "init"])
+
+    assert repr(Dense((1, 2), init=[[1, 1]])) == "Dense(shape=(1, 2))"
+
+    check_init_args(
+        Convolution,
+        [
+            "n_filters",
+            "input_shape",
+            "kernel_size",
+            "strides",
+            "padding",
+            "channels_last",
+            "init",
+        ],
+    )
+    # check_repr(Convolution(n_filters=3, input_shape=(1, 2, 3)))
+    # This fails and I can't figure out why, because when I type
+    # assert Convolution(n_filters=3, input_shape=(1, 2, 3)) ==
+    # Convolution(n_filters=3, input_shape=(1, 2, 3)) it fails
+    # temporarily commented out, because something needs an equal method
+    # bring back to test it works once it is implemented
+
     assert (
-        repr(nengo.Convolution(n_filters=3, input_shape=(1, 2, 3)))
+        repr(Convolution(n_filters=3, input_shape=(1, 2, 3)))
         == "Convolution(n_filters=3, input_shape=(1, 2, 3))"
     )
+    # temporarily commented out, because something needs an equal method
+    # bring back to test it works once it is implemented
+    # check_repr(Convolution(n_filters=3, input_shape=(1, 2, 3), kernel_size=(3, 2)))
     assert (
-        repr(nengo.Convolution(n_filters=3, input_shape=(1, 2, 3), kernel_size=(3, 2)))
+        repr(Convolution(n_filters=3, input_shape=(1, 2, 3), kernel_size=(3, 2)))
         == "Convolution(n_filters=3, input_shape=(1, 2, 3), kernel_size=(3, 2))"
     )
+    # temporarily commented out, because something needs an equal method
+    # bring back to test it works once it is implemented
+    # check_repr(Convolution(n_filters=3, input_shape=(1, 2, 3), channels_last=False))
     assert (
-        repr(nengo.Convolution(n_filters=3, input_shape=(1, 2, 3), channels_last=False))
+        repr(Convolution(n_filters=3, input_shape=(1, 2, 3), channels_last=False))
         == "Convolution(n_filters=3, input_shape=(1, 2, 3), channels_last=False)"
     )
+    check_init_args(Sparse, ["shape", "indices", "init"])
+    assert repr(Sparse((1, 1), indices=[[1, 1], [1, 1]])) == "Sparse(shape=(1, 1))"
     assert (
-        repr(nengo.Sparse((1, 1), indices=[[1, 1], [1, 1]])) == "Sparse(shape=(1, 1))"
-    )
-    assert (
-        repr(nengo.Sparse((1, 1), indices=[[1, 1], [1, 1], [1, 1]], init=2))
+        repr(Sparse((1, 1), indices=[[1, 1], [1, 1], [1, 1]], init=2))
         == "Sparse(shape=(1, 1))"
+    )
+    check_init_args(SparseMatrix, ["indices", "data", "shape"])
+    check_repr(
+        SparseMatrix(indices=array([[1, 2], [3, 4]]), data=array([5, 6]), shape=(7, 8))
     )
     assert repr(SparseMatrix(((1, 2), (3, 4)), (5, 6), (7, 8))).replace(
         ", dtype=int64", ""
@@ -228,6 +269,13 @@ def test_argreprs():
         "SparseMatrix(indices=array([[1, 2],\n       [3, 4]]),"
         " data=array([5, 6]), shape=(7, 8))"
     )
+    check_init_args(ChannelShape, ["shape", "channels_last"])
+    # check_repr(ChannelShape(shape=(1, 2, 3), channels_last=True))
+    # This fails and I can't figure out why, because when I type
+    # assert ChannelShape(shape=(1, 2, 3), channels_last=True) ==
+    # ChannelShape(shape=(1, 2, 3), channels_last=True) it fails
+    # temporarily commented out, because something needs an equal method
+    # bring back to test it works once it is implemented
     assert (
         repr(ChannelShape((1, 2, 3)))
         == "ChannelShape(shape=(1, 2, 3), channels_last=True)"
@@ -241,5 +289,7 @@ def test_argreprs():
     assert str(ChannelShape((1, 2, 3))) == "(1, 2, ch=3)"
     assert str(ChannelShape((1, 2, 3), channels_last=False)) == "(ch=1, 2, 3)"
 
+    check_init_args(NoTransform, ["size_in"])
+    check_repr(NoTransform(size_in=1))
     for dimensions in range(2):
         assert repr(NoTransform(dimensions)) == "NoTransform(size_in=%d)" % dimensions

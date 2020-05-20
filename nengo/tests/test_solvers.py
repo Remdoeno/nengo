@@ -5,7 +5,9 @@ TODO:
 """
 import logging
 
+from inspect import getfullargspec
 import numpy as np
+from numpy import array
 import pytest
 
 import nengo
@@ -694,15 +696,32 @@ def test_lstsqdrop_zero_weights():
 
 def test_argreprs():
     """Test repr() for each solver type."""
+
+    def check_init_args(cls, args):
+        assert getfullargspec(cls.__init__).args[1:] == args
+
+    def check_repr(obj):
+        assert eval(repr(obj)) == obj
+
+    check_init_args(Lstsq, ["weights", "rcond"])
+    check_repr(Lstsq(weights=True, rcond=0.1))
     assert repr(Lstsq(weights=True, rcond=0.1)) == "Lstsq(weights=True, rcond=0.1)"
 
+    check_init_args(LstsqNoise, ["weights", "noise", "solver"])
+    check_repr(LstsqNoise(weights=True, noise=0.2))
     assert (
         repr(LstsqNoise(weights=True, noise=0.2))
         == "LstsqNoise(weights=True, noise=0.2)"
     )
+    check_init_args(LstsqL2, ["weights", "reg", "solver"])
+    check_repr(LstsqL2(weights=True, reg=0.2))
     assert repr(LstsqL2(weights=True, reg=0.2)) == "LstsqL2(weights=True, reg=0.2)"
+    check_init_args(LstsqL2nz, ["weights", "reg", "solver"])
+    check_repr(LstsqL2nz(weights=True, reg=0.2))
     assert repr(LstsqL2nz(weights=True, reg=0.2)) == "LstsqL2nz(weights=True, reg=0.2)"
 
+    check_init_args(NoSolver, ["values", "weights"])
+    check_repr(NoSolver(values=array([[1.2, 3.4, 5.6, 7.8]]), weights=True))
     assert (
         repr(NoSolver([[1.2, 3.4, 5.6, 7.8]], weights=True))
         == "NoSolver(values=array([[1.2, 3.4, 5.6, 7.8]]), weights=True)"
@@ -711,7 +730,16 @@ def test_argreprs():
 
 def test_lstsql1_repr():
     """Test repr() for LstsqL1."""
+
+    def check_init_args(cls, args):
+        assert getfullargspec(cls.__init__).args[1:] == args
+
+    def check_repr(obj):
+        assert eval(repr(obj)) == obj
+
     pytest.importorskip("sklearn")
+    check_init_args(LstsqL1, ["weights", "l1", "l2", "max_iter"])
+    check_repr(LstsqL1(weights=True, l1=0.2, l2=0.3, max_iter=4))
     assert (
         repr(LstsqL1(weights=True, l1=0.2, l2=0.3, max_iter=4))
         == "LstsqL1(weights=True, l1=0.2, l2=0.3, max_iter=4)"
@@ -720,7 +748,20 @@ def test_lstsql1_repr():
 
 def test_nnls_repr():
     """Test repr() for Nnls."""
+
+    def check_init_args(cls, args):
+        assert getfullargspec(cls.__init__).args[1:] == args
+
+    def check_repr(obj):
+        assert eval(repr(obj)) == obj
+
     pytest.importorskip("scipy.optimize")
+    check_init_args(Nnls, ["weights"])
+    check_repr(Nnls(weights=True))
     assert repr(Nnls(weights=True)) == "Nnls(weights=True)"
+    check_init_args(NnlsL2, ["weights", "reg"])
+    check_repr(NnlsL2(weights=True, reg=0.2))
     assert repr(NnlsL2(weights=True, reg=0.2)) == "NnlsL2(weights=True, reg=0.2)"
+    check_init_args(NnlsL2nz, ["weights", "reg"])
+    check_repr(NnlsL2nz(weights=True, reg=0.2))
     assert repr(NnlsL2nz(weights=True, reg=0.2)) == "NnlsL2nz(weights=True, reg=0.2)"

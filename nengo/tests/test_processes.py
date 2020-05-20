@@ -1,6 +1,8 @@
 import sys
 
+from inspect import getfullargspec
 import numpy as np
+from numpy import array
 import pytest
 
 import nengo
@@ -543,21 +545,48 @@ class TestPiecewise:
 
 def test_argreprs():
     """Test repr() for each process type."""
+
+    def check_init_args(cls, args):
+        assert getfullargspec(cls.__init__).args[1:] == args
+
+    def check_repr(obj):
+        assert eval(repr(obj)) == obj
+
+    check_init_args(WhiteNoise, ["dist", "scale"])
+    check_repr(WhiteNoise(scale=False))
     assert repr(WhiteNoise()) == "WhiteNoise()"
     assert repr(WhiteNoise(scale=False)) == "WhiteNoise(scale=False)"
+    check_init_args(FilteredNoise, ["synapse", "dist", "scale"])
+    check_repr(FilteredNoise(scale=False))
     assert repr(FilteredNoise()) == "FilteredNoise()"
     assert repr(FilteredNoise(scale=False)) == "FilteredNoise(scale=False)"
+    check_init_args(BrownNoise, ["dist"])
+    check_repr(BrownNoise())
     assert repr(BrownNoise()) == "BrownNoise()"
+    check_init_args(PresentInput, ["inputs", "presentation_time"])
+
+    # try np.array, if the check doesnt work do from numpy import array
+
+    check_repr(PresentInput(inputs=array([1.2, 3.4]), presentation_time=5))
     assert (
         repr(PresentInput([1.2, 3.4], 5))
         == "PresentInput(inputs=array([1.2, 3.4]), presentation_time=5)"
     )
+    check_init_args(WhiteSignal, ["period", "high", "rms", "y0"])
+    check_repr(WhiteSignal(period=1.2, high=3.4, rms=5.6, y0=7.8))
+
     assert repr(WhiteSignal(1, 2)) == "WhiteSignal(period=1, high=2)"
     assert (
         repr(WhiteSignal(period=1.2, high=3.4, rms=5.6, y0=7.8))
         == "WhiteSignal(period=1.2, high=3.4, rms=5.6, y0=7.8)"
     )
-
+    check_init_args(Piecewise, ["data", "interpolation"])
+    # check_repr(Piecewise(data={1: array([0.1]), 2: array([0.2]), 3: array([0.3])}))
+    # This fails and I can't figure out why, because when I type
+    # assert Piecewise(data={1: array([0.1]), 2: array([0.2]), 3: array([0.3])}) ==
+    # Piecewise(data={1: array([0.1]), 2: array([0.2]), 3: array([0.3])}) it fails
+    # temporarily commented out, because something needs an equal method
+    # bring back to test it works once it is implemented
     assert (
         repr(Piecewise({1: 0.1, 2: 0.2, 3: 0.3}))
         == "Piecewise(data={1: array([0.1]), 2: array([0.2]), 3: array([0.3])})"

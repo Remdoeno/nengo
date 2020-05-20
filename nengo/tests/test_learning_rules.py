@@ -1,6 +1,6 @@
-import pytest
-
 from inspect import getfullargspec
+
+import pytest
 import numpy as np
 import nengo
 from nengo.builder import Builder

@@ -2,7 +2,6 @@ import sys
 
 from inspect import getfullargspec
 import numpy as np
-from numpy import array
 import pytest
 
 import nengo
@@ -19,6 +18,7 @@ from nengo.processes import (
     WhiteSignal,
 )
 from nengo.synapses import Lowpass
+from numpy import array
 
 
 class DistributionMock(Distribution):
@@ -547,9 +547,11 @@ def test_argreprs():
     """Test repr() for each process type."""
 
     def check_init_args(cls, args):
+        """Checks if new args are added"""
         assert getfullargspec(cls.__init__).args[1:] == args
 
     def check_repr(obj):
+        """Checks Equality and repr is done right"""
         assert eval(repr(obj)) == obj
 
     check_init_args(WhiteNoise, ["dist", "scale"])
@@ -564,8 +566,6 @@ def test_argreprs():
     check_repr(BrownNoise())
     assert repr(BrownNoise()) == "BrownNoise()"
     check_init_args(PresentInput, ["inputs", "presentation_time"])
-
-    # try np.array, if the check doesnt work do from numpy import array
 
     check_repr(PresentInput(inputs=array([1.2, 3.4]), presentation_time=5))
     assert (

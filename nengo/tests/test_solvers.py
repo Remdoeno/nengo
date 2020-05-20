@@ -7,7 +7,6 @@ import logging
 
 from inspect import getfullargspec
 import numpy as np
-from numpy import array
 import pytest
 
 import nengo
@@ -30,6 +29,7 @@ from nengo.solvers import (
     NnlsL2nz,
     NoSolver,
 )
+from numpy import array
 
 
 class Factory:
@@ -698,9 +698,11 @@ def test_argreprs():
     """Test repr() for each solver type."""
 
     def check_init_args(cls, args):
+        """Checks if new args are added"""
         assert getfullargspec(cls.__init__).args[1:] == args
 
     def check_repr(obj):
+        """Checks Equality and repr is done right"""
         assert eval(repr(obj)) == obj
 
     check_init_args(Lstsq, ["weights", "rcond"])
@@ -750,9 +752,11 @@ def test_nnls_repr():
     """Test repr() for Nnls."""
 
     def check_init_args(cls, args):
+        """Checks if new args are added"""
         assert getfullargspec(cls.__init__).args[1:] == args
 
     def check_repr(obj):
+        """Checks Equality and repr is done right"""
         assert eval(repr(obj)) == obj
 
     pytest.importorskip("scipy.optimize")

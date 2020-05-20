@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import array
 import pytest
 from inspect import getfullargspec
 
@@ -8,6 +7,7 @@ from nengo import Dense, Sparse, Convolution
 from nengo.exceptions import BuildError, ValidationError
 from nengo.transforms import ChannelShape, NoTransform, SparseMatrix
 from nengo._vendor.npconv2d import conv2d
+from numpy import array
 
 
 @pytest.mark.parametrize("dimensions", (1, 2))
@@ -207,9 +207,11 @@ def test_argreprs():
     """Test repr() for each transform type."""
 
     def check_init_args(cls, args):
+        """Checks if new args are added"""
         assert getfullargspec(cls.__init__).args[1:] == args
 
     def check_repr(obj):
+        """Checks Equality and repr is done right"""
         assert eval(repr(obj)) == obj
 
     check_init_args(Dense, ["shape", "init"])

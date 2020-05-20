@@ -713,9 +713,11 @@ def test_argreprs():
     """Test repr() for each learning rule type."""
 
     def check_init_args(cls, args):
+        """Checks if new args are added"""
         assert getfullargspec(cls.__init__).args[1:] == args
 
     def check_repr(obj):
+        """Checks Equality and repr is done right"""
         assert eval(repr(obj)) == obj
 
     check_init_args(PES, ["learning_rate", "pre_synapse"])

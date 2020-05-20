@@ -1,7 +1,7 @@
-import numpy as np
 import pytest
 
 from inspect import getfullargspec
+import numpy as np
 import nengo
 from nengo.builder import Builder
 from nengo.builder.operator import Reset, Copy

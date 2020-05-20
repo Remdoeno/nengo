@@ -1,6 +1,6 @@
+from inspect import getfullargspec
 import numpy as np
 import pytest
-from inspect import getfullargspec
 
 import nengo
 from nengo import Dense, Sparse, Convolution
